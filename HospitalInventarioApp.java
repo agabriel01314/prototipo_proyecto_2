@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -96,6 +97,24 @@ class InventarioMedicamentos {
             System.out.println(medicamento.toString());
         }
     }
+
+    public void write() throws IOException{//Escribe el inventario de medicamentos como un respaldo .csv
+        if(!medicamentos.isEmpty()){
+            FileWriter archivo = new FileWriter("medicamentos.csv");
+            BufferedWriter inventario = new BufferedWriter(archivo);
+            
+            medicamentos.forEach((e)-> {
+                try {
+                    inventario.write("Medicamento | "+e.getNombre()+ " | "+e.getCantidad());
+                    inventario.newLine();
+                } catch (IOException e1) {
+                    System.out.println("OCURRIÓ UN ERROR EN LA EXPORTACIÓN DEL ARCHIVO");            
+                }            
+            });
+            inventario.close();
+            System.out.println("Exportado con éxito");
+        }
+    }
 }
 
 // Clase InventarioObjetos (Modelo)
@@ -119,6 +138,24 @@ class InventarioObjetos {
         }
     }
 
+    public void write() throws IOException{//Escribe el inventario de objetos como un respaldo .csv
+        if(!objetos.isEmpty()){
+            FileWriter archivo = new FileWriter("objetos.csv");
+            BufferedWriter inventario = new BufferedWriter(archivo);
+            
+            objetos.forEach((e)-> {
+                try {
+                    inventario.write("Objeto | "+e.getNombre()+ " | "+e.getCantidad());
+                    inventario.newLine();
+                } catch (IOException e1) {
+                    System.out.println("OCURRIÓ UN ERROR EN LA EXPORTACIÓN DEL ARCHIVO");            
+                }            
+            });
+            inventario.close();
+            System.out.println("Exportado con éxito");
+        }
+    }
+
     public void verInventarioObjetos() {
         System.out.println("Inventario de Objetos:");
         for (Objeto objeto : objetos) {
@@ -127,7 +164,7 @@ class InventarioObjetos {
     }
 }
 
-// Clase Menu (Vista-Controlador)
+// Clase Menu (Vista-Controlador)x
 class Menu {
     public static int mostrarMenu() {
         Scanner scanner = new Scanner(System.in);
@@ -143,7 +180,25 @@ class Menu {
         return opcion;
     }
 
-    public static void leerOpcion(InventarioMedicamentos inventarioMedicamentos, InventarioObjetos inventarioObjetos) {
+    public static void writeIngreso(String n, int c) throws IOException{//Registrar el ingreso de un objeto o medicamento
+    FileWriter registro = new FileWriter("ingresos.csv");
+    BufferedWriter ingreso = new BufferedWriter(registro);
+
+    ingreso.write("-Se ingresó "+c+" unidades de "+n);
+    ingreso.newLine();
+    ingreso.close();
+    }
+
+    public static void writeRetiro(String n, int c) throws IOException{//Registrar el retiro de un objeto o medicamento
+    FileWriter registro = new FileWriter("retiros.csv");
+    BufferedWriter retiro = new BufferedWriter(registro);
+
+    retiro.write("-Se retiró "+c+" unidades de "+n);
+    retiro.newLine();
+    retiro.close();
+    }
+
+    public static void leerOpcion(InventarioMedicamentos inventarioMedicamentos, InventarioObjetos inventarioObjetos) throws IOException {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -157,6 +212,7 @@ class Menu {
                     int cantidadMedicamento = scanner.nextInt();
                     Medicamento medicamento = new Medicamento(nombreMedicamento, cantidadMedicamento);
                     inventarioMedicamentos.agregarMedicamento(medicamento);
+                    writeIngreso(nombreMedicamento, cantidadMedicamento);
                     break;
                 case 2:
                     System.out.print("Ingrese el nombre del objeto: ");
@@ -165,6 +221,7 @@ class Menu {
                     int cantidadObjeto = scanner.nextInt();
                     Objeto objeto = new Objeto(nombreObjeto, cantidadObjeto);
                     inventarioObjetos.agregarObjeto(objeto);
+                    writeIngreso(nombreObjeto, cantidadObjeto);
                     break;
                 case 3:
                     System.out.print("Ingrese el nombre del medicamento a retirar: ");
@@ -172,6 +229,7 @@ class Menu {
                     System.out.print("Ingrese la cantidad de medicamento a retirar: ");
                     int cantidadMedicamentoRetirar = scanner.nextInt();
                     inventarioMedicamentos.retirarMedicamento(nombreMedicamentoRetirar, cantidadMedicamentoRetirar);
+                    writeRetiro(nombreMedicamentoRetirar, cantidadMedicamentoRetirar);
                     break;
                 case 4:
                     System.out.print("Ingrese el nombre del objeto a retirar: ");
@@ -179,10 +237,13 @@ class Menu {
                     System.out.print("Ingrese la cantidad de objeto a retirar: ");
                     int cantidadObjetoRetirar = scanner.nextInt();
                     inventarioObjetos.retirarObjeto(nombreObjetoRetirar, cantidadObjetoRetirar);
+                    writeRetiro(nombreObjetoRetirar, cantidadObjetoRetirar);
                     break;
                 case 5:
                     inventarioMedicamentos.verInventarioMedicamentos();
                     inventarioObjetos.verInventarioObjetos();
+                    inventarioMedicamentos.write();//Respaldo CSV
+                    inventarioObjetos.write();//Respaldo CSV
                     break;
                 case 6:
                     System.out.println("Saliendo del programa.");
@@ -194,11 +255,17 @@ class Menu {
             }
         }
     }
+
+    public static void usuarios(InventarioMedicamentos inventarioMedicamentos, InventarioObjetos inventarioObjetos) {
+    }
 }
+
+
+
 
 // Clase HospitalInventarioApp (Controlador)
 public class HospitalInventarioApp {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException{
         InventarioMedicamentos inventarioMedicamentos = new InventarioMedicamentos();
         InventarioObjetos inventarioObjetos = new InventarioObjetos();
 
